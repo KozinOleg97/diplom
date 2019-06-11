@@ -1,0 +1,94 @@
+create table login_method
+(
+  method_name varchar(15) not null
+    constraint login_method_pk
+    primary key
+);
+
+alter table login_method
+  owner to postgres;
+
+create table account_data
+(
+  name       varchar(30),
+  surname    varchar(30),
+  patronim   varchar(30),
+  department varchar(70),
+  mail       varchar(40),
+  phone      varchar(12),
+  id         serial not null
+    constraint account_data_pk
+    primary key
+);
+
+alter table account_data
+  owner to postgres;
+
+create table idp
+(
+  id          serial not null
+    constraint idp_pk
+    primary key,
+  idp_adr     text,
+  auth_method varchar(15)
+    constraint idp_login_method_method_name_fk
+    references login_method
+);
+
+alter table idp
+  owner to postgres;
+
+create table account
+(
+  id      serial not null
+    constraint account_pkey
+    primary key,
+  login   varchar(30),
+  data_id integer
+    constraint account_account_data_id_fk
+    references account_data,
+  token   text
+);
+
+alter table account
+  owner to postgres;
+
+create table user_auth_methods
+(
+  account_id integer
+    constraint user_auth_methods_account_id_fk
+    references account,
+  idp_id     integer
+    constraint user_auth_methods_idp_id_fk
+    references idp
+);
+
+alter table user_auth_methods
+  owner to postgres;
+
+create table natural_person
+(
+  pasport integer not null
+    constraint natural_person_pk
+    primary key,
+  constraint natural_person_account_id_fk
+  foreign key (id) references account
+)
+  inherits (account_data);
+
+alter table natural_person
+  owner to postgres;
+
+create table legal_entity
+(
+  inn integer not null
+    constraint legal_entity_pk
+    primary key,
+  constraint legal_entity_account_id_fk
+  foreign key (id) references account
+)
+  inherits (account_data);
+
+alter table legal_entity
+  owner to postgres;
+
